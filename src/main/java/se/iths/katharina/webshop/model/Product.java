@@ -13,6 +13,7 @@ public class Product {
         this.description = description;
     }
 
+    //region getters and setters
     public String getArticleNumber() {
         return articleNumber;
     }
@@ -45,14 +46,23 @@ public class Product {
         this.description = description;
     }
 
+    //endregion
 
     public String toFileLine() {
-
         return articleNumber + ";" + title + ";" + price + ";" + description;
     }
 
     public static Product fromFileLine(String line) {
+        String[] parts = line.split(";", 4);
+        if (parts.length != 4) {
+            throw new IllegalArgumentException("Fel format: " + line);
+        }
+        String articleNumber = parts[0];
+        String title = parts[1];
+        double price = Double.parseDouble(parts[2]);
+        String description = parts[3];
 
-
+        return new Product(articleNumber, title, price, description);
     }
+
 }
