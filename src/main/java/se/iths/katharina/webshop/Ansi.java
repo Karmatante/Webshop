@@ -9,5 +9,7 @@ public class Ansi {
     public final static String GREEN = "\u001B[32m";
     public static final String TEAL = "\u001B[38;2;0;128;128m";
     public static final String ITALIC = "\u001B[3m";
-
+    public static final String ORANGE = "\u001B[38;2;190;85;0m";
+    public static final String GRAY = "\u001B[38;2;100;100;100m";
 }
+

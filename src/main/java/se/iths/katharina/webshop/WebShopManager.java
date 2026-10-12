@@ -66,7 +66,10 @@ public class WebShopManager {
         String choice = outInputHandler.menu();
         while (!choice.equals("4")) {
             if (choice.equals("1")) {
+                outInputHandler.info("");
                 outInputHandler.showHeader("LÄGG TILL NY PRODUKT");
+                outInputHandler.info("Fyll i uppgifterna nedan för att registrera en ny produkt.");
+                outInputHandler.info("");
                 String articleNumber = outInputHandler.prompt("Ange artikelnummer:");
                 String title = outInputHandler.prompt("Ange produkttitel: ");
                 double price = 0;
@@ -86,55 +89,100 @@ public class WebShopManager {
                 }
                 String description = outInputHandler.prompt("Ange en produktbeskrivning: ");
                 Product product = new Product(articleNumber, title, price, description);
-                saveProductToStorage(product);
-                IO.println();
-                outInputHandler.info("Produktregistreringen har avslutats.");
-                IO.println();
-                IO.println("───────────────────────────────────────────────");
-                outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
+
+                //region Granska produktuppgifter
+                outInputHandler.info("");
+                outInputHandler.showHeader("GRANSKA PRODUKTUPPGIFTER");
+                outInputHandler.info("Kontrollera att uppgifterna stämmer innan du sparar produkten.");
+                outInputHandler.info("");
+
+                outInputHandler.info(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
+                outInputHandler.info("ARTIKELNUMMER        " + product.getArticleNumber());
+                outInputHandler.info("PRODUKTTITEL         " + product.getTitle());
+                outInputHandler.info("PRIS                 " + String.format("%.2f", product.getPrice()) + " kr");
+                outInputHandler.info("PRODUKTBESKRIVNING   " + product.getDescription());
+
+                outInputHandler.info(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
+                outInputHandler.info(Ansi.ORANGE + Ansi.ITALIC + " ⚠\uFE0E Produkten är ännu inte sparad." + Ansi.RESET);
+                outInputHandler.info("");
+                outInputHandler.info("Vill du spara produkten?");
+                outInputHandler.info(Ansi.GREEN + "[1] Bekräfta och spara" + Ansi.RESET);
+                outInputHandler.info(Ansi.RED + "[2] Avbryt utan att spara" + Ansi.RESET);
+
+                String saveChoice = outInputHandler.prompt("Ditt val [1-2]: ");
+                while (!saveChoice.equals("1") && !saveChoice.equals("2")) {
+                    outInputHandler.info("Ogiltigt val. Ange 1 eller 2.");
+                    saveChoice = outInputHandler.prompt("Ditt val [1-2]: ");
+                }
+                //endregion
+
+                if (saveChoice.equals("1")) {
+                    saveProductToStorage(product);
+                    outInputHandler.info("Produkten har sparats!");
+                    outInputHandler.info(Ansi.ITALIC + product.getTitle() + " (" + product.getArticleNumber() + ")" + Ansi.RESET);
+                    outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
+                }
+                if (saveChoice.equals("2")) {
+                    outInputHandler.info("Produktregistreringen har avslutats.");
+                    outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
+                }
             }
             if (choice.equals("2")) {
                 outInputHandler.showHeader("PRODUKTÖVERSIKT");
                 List<Product> products = getProductsFromStorage();
                 for (Product product : products) {
+                    outInputHandler.info(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
                     double discountedPrice = discount.calculatePrice(product.getPrice());
-                    String articleNumber = "Artikelnummer: " + product.getArticleNumber();
-                    String title = "Produkttitel: " + product.getTitle();
-                    String price = "Pris: " + String.format("%.2f", product.getPrice());
-                    String description = "Beskrivning: " + product.getDescription();
-                    String discountedPriceText = "Rabatterat pris: " + String.format("%.2f", discountedPrice);
+                    String title = Ansi.BOLD + Ansi.TEAL + product.getTitle().toUpperCase() + Ansi.RESET;
+                    String articleNumber = Ansi.GRAY + "Artikelnummer: " + product.getArticleNumber() + Ansi.RESET;
+                    String price = "Ordinarie pris: " + String.format("%.2f", product.getPrice()) + " kr";
+                    String description = "Produktbeskrivning: " + product.getDescription();
+                    String discountedPriceText = Ansi.GREEN + "Rabatterat pris: " + String.format("%.2f", discountedPrice) + " kr" + Ansi.RESET;
 
                     String productInformation =
-                            articleNumber + System.lineSeparator()
-                                    + title + System.lineSeparator()
+                            title + System.lineSeparator()
+                                    + articleNumber + System.lineSeparator()
+                                    + description + System.lineSeparator()
                                     + price + System.lineSeparator()
-                                    + discountedPriceText + System.lineSeparator()
-                                    + description;
+                                    + discountedPriceText;
 
                     outInputHandler.info(productInformation);
                 }
+                if (products.isEmpty()) {
+                    outInputHandler.info("Det finns inga registrerade produkter ännu.");
+                }
+                outInputHandler.info("");
+                outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + System.lineSeparator() + Ansi.RESET);
             }
+
             if (choice.equals("3")) {
                 outInputHandler.showHeader("VISA PRODUKTINFORMATION");
                 String articleNumber = outInputHandler.prompt("Ange artikelnummer: ");
+                outInputHandler.info(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
                 Product product = getProductFromStorage(articleNumber);
                 if (product != null) {
                     double discountedPrice = discount.calculatePrice(product.getPrice());
-                    String articleNumberText = "Artikelnummer: " + product.getArticleNumber();
-                    String titleText = "Produkttitel: " + product.getTitle();
-                    String priceText = "Pris: " + String.format("%.2f", product.getPrice());
+                    String articleNumberText = Ansi.GRAY + "Artikelnummer: " + product.getArticleNumber() + Ansi.RESET;
+                    String titleText = Ansi.TEAL + Ansi.BOLD + product.getTitle().toUpperCase() + Ansi.RESET;
+                    String priceText = "Ordinarie pris: " + String.format("%.2f", product.getPrice()) + " kr";
                     String descriptionText = "Produktbeskrivning: " + product.getDescription();
-                    String discountedPriceText = "Rabatterat pris: " + String.format("%.2f", discountedPrice);
-                    String productInfo =
-                            articleNumberText + System.lineSeparator()
-                                    + titleText + System.lineSeparator()
-                                    + priceText + System.lineSeparator()
+                    String discountedPriceText = Ansi.GREEN + "Rabatterat pris: " + String.format("%.2f", discountedPrice) + " kr" + Ansi.RESET;
+
+                    String productInformation =
+                            titleText + System.lineSeparator()
+                                    + articleNumberText + System.lineSeparator()
                                     + descriptionText + System.lineSeparator()
+                                    + priceText + System.lineSeparator()
                                     + discountedPriceText;
-                    outInputHandler.info(productInfo);
+
+                    outInputHandler.info(productInformation);
                 } else {
-                    outInputHandler.info("Produkten hittades inte.");
+                    outInputHandler.info(Ansi.ORANGE + "⚠\uFE0E INGEN PRODUKT HITTADES" + Ansi.RESET);
+                    outInputHandler.info("Ingen produkt hittades med artikelnummer " + Ansi.ITALIC + Ansi.GRAY + articleNumber + Ansi.RESET);
                 }
+                outInputHandler.info(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
+                outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + System.lineSeparator() + Ansi.RESET);
+
             }
 
             if (!choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
@@ -142,8 +190,13 @@ public class WebShopManager {
             }
 
             choice = outInputHandler.menu();
-        }
 
+        }
+        outInputHandler.info("");
+        outInputHandler.showHeader("AVSLUTAR POSH & SPICY");
+        outInputHandler.info("Tack för att du använde POSH & SPICY!");
+        outInputHandler.info("Produktadministrationen avslutas.");
+        outInputHandler.info(Ansi.TEAL + Ansi.ITALIC + "På återseende!" + Ansi.RESET);
 
     }
 }
