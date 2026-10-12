@@ -7,4 +7,6 @@ public interface OutInputHandler {
     void info(String message);
 
     String menu();
+
+    void showHeader(String textHeader);
 }

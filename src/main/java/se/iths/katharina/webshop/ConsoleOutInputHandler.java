@@ -13,10 +13,23 @@ public class ConsoleOutInputHandler implements OutInputHandler {
 
     @Override
     public String menu() {
-        IO.println("1. Lägg till produkt");
-        IO.println("2. Lista alla produkter");
-        IO.println("3. Visa information om en produkt");
-        IO.println("4. Avsluta applikationen");
-        return IO.readln("Ditt val: ");
+
+        IO.println();
+        IO.println(Ansi.BOLD + Ansi.GREEN + "HUVUDMENY" + Ansi.RESET);
+        IO.println("───────────────────────────────────────────────");
+        IO.println(Ansi.BOLD + "[1]" + Ansi.RESET + " Lägg till produkt");
+        IO.println(Ansi.BOLD + "[2]" + Ansi.RESET + " Lista alla produkter");
+        IO.println(Ansi.BOLD + "[3]" + Ansi.RESET + " Visa information om en produkt");
+        IO.println();
+        IO.println("───────────────────────────────────────────────");
+        IO.println(Ansi.BOLD + "[4]" + Ansi.RESET + " Avsluta applikationen");
+        IO.println();
+        return IO.readln(Ansi.BOLD + "Välj en funktion [1]-[4]: " + Ansi.RESET);
+    }
+
+    @Override
+    public void showHeader(String textHeader) {
+        IO.println(Ansi.TEAL + "▌  " + Ansi.RESET
+                + Ansi.BOLD + textHeader + Ansi.RESET);
     }
 }

@@ -30,15 +30,32 @@ public class WebShopManager {
 
     void startWebshop() {
 
-        //region Greeting Webshop
+
+//region Greeting Webshop
         String welcomeText =
-                "========================================" + System.lineSeparator()
-                        + "             JAVA WEBSHOP" + System.lineSeparator()
-                        + "========================================";
-        //endregion
+                System.lineSeparator()
+                        + Ansi.BOLD + "P O S H  &  S P I C Y" + Ansi.RESET
+                        + System.lineSeparator()
+                        + Ansi.TEAL + "WEBSHOP · PRODUKTADMINISTRATION" + Ansi.RESET
+                        + System.lineSeparator()
+                        + Ansi.TEAL + "────────────────────────────────────" + Ansi.RESET
+                        + System.lineSeparator()
+                        + "Välkommen till produktadministrationen!"
+                        + System.lineSeparator()
+                        + "Hantera produkter, priser och produktinformation."
+                        + System.lineSeparator();
+//endregion
+
         outInputHandler.info(welcomeText);
 
-        String discountCode = outInputHandler.prompt("Ange rabattkod: ");
+        outInputHandler.showHeader("RABATTINSTÄLLNING");
+
+        outInputHandler.info("Här kan du ange en rabattkod som används när produktpriser visas i applikationen.");
+        outInputHandler.info(Ansi.ITALIC + "Rabatten påverkar inte produkternas ordinarie priser." + Ansi.RESET);
+        IO.println();
+        outInputHandler.info(Ansi.GREEN + "Ange rabattkod eller tryck Enter för att fortsätta med standardrabatten." + Ansi.RESET);
+        IO.println();
+        String discountCode = outInputHandler.prompt(Ansi.BOLD + "Ange rabattkod: " + Ansi.RESET);
         Discount discount;
         if (discountCode.equals("halfprice")) {
             discount = new HalfPriceDiscount("halfprice");
@@ -49,16 +66,35 @@ public class WebShopManager {
         String choice = outInputHandler.menu();
         while (!choice.equals("4")) {
             if (choice.equals("1")) {
+                outInputHandler.showHeader("LÄGG TILL NY PRODUKT");
                 String articleNumber = outInputHandler.prompt("Ange artikelnummer:");
                 String title = outInputHandler.prompt("Ange produkttitel: ");
-                String priceInput = outInputHandler.prompt("Ange pris: ");
-                double price = Double.parseDouble(priceInput);
-                String description = outInputHandler.prompt("Ange en produktbeskrivning: ");
+                double price = 0;
+                boolean validPrice = false;
 
+                while (!validPrice) {
+                    String priceInput = outInputHandler.prompt("Ange pris: ");
+
+                    String correctedPriceInput = priceInput.replace(',', '.');
+
+                    try {
+                        price = Double.parseDouble(correctedPriceInput);
+                        validPrice = true;
+                    } catch (NumberFormatException e) {
+                        outInputHandler.info(Ansi.ITALIC + "Ogiltigt pris! Ange ett giltigt tal, exempelvis 79,99 eller 79.99. Försök igen." + Ansi.RESET);
+                    }
+                }
+                String description = outInputHandler.prompt("Ange en produktbeskrivning: ");
                 Product product = new Product(articleNumber, title, price, description);
                 saveProductToStorage(product);
+                IO.println();
+                outInputHandler.info("Produktregistreringen har avslutats.");
+                IO.println();
+                IO.println("───────────────────────────────────────────────");
+                outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
             }
             if (choice.equals("2")) {
+                outInputHandler.showHeader("PRODUKTÖVERSIKT");
                 List<Product> products = getProductsFromStorage();
                 for (Product product : products) {
                     double discountedPrice = discount.calculatePrice(product.getPrice());
@@ -79,6 +115,7 @@ public class WebShopManager {
                 }
             }
             if (choice.equals("3")) {
+                outInputHandler.showHeader("VISA PRODUKTINFORMATION");
                 String articleNumber = outInputHandler.prompt("Ange artikelnummer: ");
                 Product product = getProductFromStorage(articleNumber);
                 if (product != null) {
@@ -99,6 +136,11 @@ public class WebShopManager {
                     outInputHandler.info("Produkten hittades inte.");
                 }
             }
+
+            if (!choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
+                outInputHandler.info("Ogiltigt val. Försök igen.");
+            }
+
             choice = outInputHandler.menu();
         }
 
