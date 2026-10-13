@@ -5,11 +5,12 @@ import se.iths.katharina.webshop.model.HalfPriceDiscount;
 import se.iths.katharina.webshop.model.Product;
 import se.iths.katharina.webshop.model.TenPercentDiscount;
 
+import java.io.UncheckedIOException;
 import java.util.List;
 
 public class WebShopManager {
-    private ProductStorage productStorage;
-    private OutInputHandler outInputHandler;
+    private final ProductStorage productStorage;
+    private final OutInputHandler outInputHandler;
 
     public WebShopManager(ProductStorage productStorage, OutInputHandler outInputHandler) {
         this.productStorage = productStorage;
@@ -30,8 +31,7 @@ public class WebShopManager {
 
     void startWebshop() {
 
-
-//region Greeting Webshop
+        //region Greeting Webshop
         String welcomeText =
                 System.lineSeparator()
                         + Ansi.BOLD + "P O S H  &  S P I C Y" + Ansi.RESET
@@ -48,13 +48,14 @@ public class WebShopManager {
 
         outInputHandler.info(welcomeText);
 
+        //region Discount Handling
         outInputHandler.showHeader("RABATTINSTÄLLNING");
 
         outInputHandler.info("Här kan du ange en rabattkod som används när produktpriser visas i applikationen.");
         outInputHandler.info(Ansi.ITALIC + "Rabatten påverkar inte produkternas ordinarie priser." + Ansi.RESET);
-        IO.println();
+        outInputHandler.info("");
         outInputHandler.info(Ansi.GREEN + "Ange rabattkod eller tryck Enter för att fortsätta med standardrabatten." + Ansi.RESET);
-        IO.println();
+        outInputHandler.info("");
         String discountCode = outInputHandler.prompt(Ansi.BOLD + "Ange rabattkod: " + Ansi.RESET);
         Discount discount;
         if (discountCode.equals("halfprice")) {
@@ -62,16 +63,31 @@ public class WebShopManager {
         } else {
             discount = new TenPercentDiscount("tenpercent");
         }
+        //endregion
 
         String choice = outInputHandler.menu();
+
         while (!choice.equals("4")) {
+            //region Menu choice 1
             if (choice.equals("1")) {
                 outInputHandler.info("");
                 outInputHandler.showHeader("LÄGG TILL NY PRODUKT");
                 outInputHandler.info("Fyll i uppgifterna nedan för att registrera en ny produkt.");
                 outInputHandler.info("");
-                String articleNumber = outInputHandler.prompt("Ange artikelnummer:");
+                String articleNumber = outInputHandler.prompt("Ange artikelnummer: ");
+                while (articleNumber.isEmpty() || getProductFromStorage(articleNumber) != null) {
+                    if (articleNumber.isEmpty()) {
+                        outInputHandler.info(Ansi.RED + "Artikelnumret får inte vara tomt. Försök igen." + Ansi.RESET);
+                    } else {
+                        outInputHandler.info(Ansi.RED + "Artikelnummer finns redan. Försök igen." + Ansi.RESET);
+                    }
+                    articleNumber = outInputHandler.prompt("Ange artikelnummer: ");
+                }
                 String title = outInputHandler.prompt("Ange produkttitel: ");
+                while (title.isEmpty()) {
+                    outInputHandler.info(Ansi.RED + "Produkttiteln får inte vara tomt. Försök igen." + Ansi.RESET);
+                    title = outInputHandler.prompt("Ange produkttitel: ");
+                }
                 double price = 0;
                 boolean validPrice = false;
 
@@ -82,12 +98,21 @@ public class WebShopManager {
 
                     try {
                         price = Double.parseDouble(correctedPriceInput);
-                        validPrice = true;
+
+                        if (price < 0) {
+                            outInputHandler.info(Ansi.RED + "Priset får inte vara negativt. Vänligen försök igen." + Ansi.RESET);
+                        } else {
+                            validPrice = true;
+                        }
                     } catch (NumberFormatException e) {
-                        outInputHandler.info(Ansi.ITALIC + "Ogiltigt pris! Ange ett giltigt tal, exempelvis 79,99 eller 79.99. Försök igen." + Ansi.RESET);
+                        outInputHandler.info(Ansi.RED + Ansi.ITALIC + "Ogiltigt pris! Ange ett giltigt tal, exempelvis 79,99 eller 79.99. Försök igen." + Ansi.RESET);
                     }
                 }
                 String description = outInputHandler.prompt("Ange en produktbeskrivning: ");
+                while (description.isEmpty()) {
+                    outInputHandler.info(Ansi.RED + "Produktbeskrivningen får inte vara tom. Försök igen." + Ansi.RESET);
+                    description = outInputHandler.prompt("Ange produktbeskrivning: ");
+                }
                 Product product = new Product(articleNumber, title, price, description);
 
                 //region Granska produktuppgifter
@@ -117,9 +142,14 @@ public class WebShopManager {
                 //endregion
 
                 if (saveChoice.equals("1")) {
-                    saveProductToStorage(product);
-                    outInputHandler.info("Produkten har sparats!");
-                    outInputHandler.info(Ansi.ITALIC + product.getTitle() + " (" + product.getArticleNumber() + ")" + Ansi.RESET);
+                    try {
+                        saveProductToStorage(product);
+                        outInputHandler.info(Ansi.GREEN + Ansi.BOLD + "Produkten har sparats!" + Ansi.RESET);
+                        outInputHandler.info(Ansi.ITALIC + product.getTitle() + " (" + product.getArticleNumber() + ")" + Ansi.RESET);
+                        outInputHandler.info("");
+                    } catch (UncheckedIOException e) {
+                        outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produkten kunde inte sparas. Återgå till huvudmenyn och försök igen." + Ansi.RESET);
+                    }
                     outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
                 }
                 if (saveChoice.equals("2")) {
@@ -127,6 +157,9 @@ public class WebShopManager {
                     outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
                 }
             }
+            //endregion
+
+            //region Menu choice 2
             if (choice.equals("2")) {
                 outInputHandler.showHeader("PRODUKTÖVERSIKT");
                 List<Product> products = getProductsFromStorage();
@@ -154,7 +187,9 @@ public class WebShopManager {
                 outInputHandler.info("");
                 outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + System.lineSeparator() + Ansi.RESET);
             }
+            //endregion
 
+            //region Menu choice 3
             if (choice.equals("3")) {
                 outInputHandler.showHeader("VISA PRODUKTINFORMATION");
                 String articleNumber = outInputHandler.prompt("Ange artikelnummer: ");
@@ -188,15 +223,17 @@ public class WebShopManager {
             if (!choice.equals("1") && !choice.equals("2") && !choice.equals("3")) {
                 outInputHandler.info("Ogiltigt val. Försök igen.");
             }
+            //endregion
 
             choice = outInputHandler.menu();
 
         }
+        //region Menu choice 4
         outInputHandler.info("");
         outInputHandler.showHeader("AVSLUTAR POSH & SPICY");
         outInputHandler.info("Tack för att du använde POSH & SPICY!");
         outInputHandler.info("Produktadministrationen avslutas.");
         outInputHandler.info(Ansi.TEAL + Ansi.ITALIC + "På återseende!" + Ansi.RESET);
-
+        //endregion
     }
 }

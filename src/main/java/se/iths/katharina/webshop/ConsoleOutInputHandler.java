@@ -20,7 +20,6 @@ public class ConsoleOutInputHandler implements OutInputHandler {
         IO.println(Ansi.BOLD + "[1]" + Ansi.RESET + " Lägg till produkt");
         IO.println(Ansi.BOLD + "[2]" + Ansi.RESET + " Lista alla produkter");
         IO.println(Ansi.BOLD + "[3]" + Ansi.RESET + " Visa information om en produkt");
-        IO.println();
         IO.println(Ansi.TEAL + "───────────────────────────────────────────────" + Ansi.RESET);
         IO.println(Ansi.BOLD + "[4]" + Ansi.RESET + " Avsluta applikationen");
         IO.println();

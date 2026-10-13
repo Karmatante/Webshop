@@ -3,6 +3,7 @@ package se.iths.katharina.webshop;
 import se.iths.katharina.webshop.model.Product;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -19,7 +20,7 @@ public class ProductFileStorage implements ProductStorage {
         try {
             Files.writeString(file, productInformation, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            System.err.println("Kunde inte skriva till filen: " + e.getMessage());
+            throw new UncheckedIOException(e);
         }
     }
 
