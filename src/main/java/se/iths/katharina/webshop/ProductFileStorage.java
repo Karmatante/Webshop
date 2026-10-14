@@ -33,11 +33,15 @@ public class ProductFileStorage implements ProductStorage {
         try {
             List<String> lines = Files.readAllLines(file);
             for (String line : lines) {
-                Product createdProduct = Product.fromFileLine(line);
-                products.add(createdProduct);
+                try {
+                    Product createdProduct = Product.fromFileLine(line);
+                    products.add(createdProduct);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Felaktig produktpost i filen; " + line, e);
+                }
             }
         } catch (IOException e) {
-            System.err.println("Kunde inte läsa raderna: " + e.getMessage());
+            throw new UncheckedIOException(e);
         }
         return products;
     }
