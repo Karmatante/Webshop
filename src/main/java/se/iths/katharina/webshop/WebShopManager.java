@@ -80,6 +80,8 @@ public class WebShopManager {
 
         } catch (UncheckedIOException e) {
             outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktregistreringen kunde inte fortsätta eftersom produktfilen inte kunde läsas." + Ansi.RESET);
+        } catch (IllegalArgumentException e) {
+            outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktfilen innehåller felaktiga produktuppgifter. Produktregistreringen kan inte fortsätta." + Ansi.RESET);
         }
         outInputHandler.info("");
         outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
@@ -189,8 +191,10 @@ public class WebShopManager {
 
         } catch (UncheckedIOException e) {
             outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktinformationen kunde inte hämtas. Återgå till huvudmenyn och försök igen." + Ansi.RESET);
+        } catch (IllegalArgumentException e) {
+            outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktfilen innehåller felaktiga produktuppgifter. Produktinformationen kan inte visas." + Ansi.RESET);
         }
-        outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + System.lineSeparator() + Ansi.RESET);
+        outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
     }
 
     private void displayProduct(Discount discount, Product product) {
@@ -226,11 +230,11 @@ public class WebShopManager {
         } catch (UncheckedIOException e) {
             outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktlistan kunde inte läsas. Återgå till huvudmenyn och försök igen." + Ansi.RESET);
         } catch (IllegalArgumentException e) {
-            outInputHandler.info("Produktfilen innehåller felaktiga produktuppgifter. Produktlistan kan inte visas.");
+            outInputHandler.info(Ansi.BOLD + Ansi.RED + "Produktfilen innehåller felaktiga produktuppgifter. Produktlistan kan inte visas." + Ansi.RESET);
         }
 
         outInputHandler.info("");
-        outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + System.lineSeparator() + Ansi.RESET);
+        outInputHandler.prompt(Ansi.BOLD + Ansi.ITALIC + Ansi.TEAL + "[Tryck Enter för att återgå till huvudmenyn...]" + Ansi.RESET);
     }
 
     private Discount configureDiscount() {
