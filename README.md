@@ -191,6 +191,17 @@ The current version provides product administration through the console. It is n
 
 Possible future improvements include expanded test coverage, more robust input validation, and a graphical interface.
 
+
+## Screenshots
+
+The screenshots below show the console-based application in action.
+
+![POSH & SPICY console screenshot 1](Screenshots/1792332327991.jpg)
+
+![POSH & SPICY console screenshot 2](Screenshots/1792332328100.jpg)
+
+![POSH & SPICY console screenshot 3](Screenshots/1792332328336.jpg)
+
 ---
 
 Developed as part of my Java developer education at **IT-Högskolan, Sweden**.
